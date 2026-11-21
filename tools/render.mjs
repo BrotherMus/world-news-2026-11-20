@@ -130,43 +130,33 @@ const tiles = [
     body: 'CGIL rallies in 100+ cities; 25 countries march.', src: 'Unions' },
   { n: 10, key: 'IRAQ', art: 'iraq', tag: 'JURF AL-SAKHAR · SECURITY', head: 'Iraqi troops enter militia stronghold',
     body: 'Kataib Hezbollah to leave within a month.', src: 'Iraqi govt' },
-  { n: 11, key: 'KENYA OIL', art: 'kenya', tag: 'TURKANA · ENERGY', head: 'Kenya starts drilling first oil well',
+  { n: 11, key: 'KENYA OIL', art: 'kenya', tag: 'TURKANA · ENERGY', head: 'Kenya starts drilling its first oil well',
     body: 'Phase one aims for 20,000+ barrels a day.', src: 'Energy ministry' },
-  { n: 12, key: 'NEW DELHI', art: 'delhi', tag: 'INDIA · PAKISTAN', head: 'Pakistani minister visits India',
-    body: 'First since the May 2025 war; SCO forum.', src: 'Al Jazeera' },
-  { n: 13, key: 'CANCER PILL', art: 'pill', tag: 'BARCELONA · HEALTH', head: 'Pill shrinks pancreatic tumours',
+  { n: 12, key: 'CANCER PILL', art: 'pill', tag: 'BARCELONA · HEALTH', head: 'Pill shrinks pancreatic tumours',
     body: '60.7% of 61 patients respond in early trial.', src: 'EORTC' },
-  { n: 14, key: 'BOX OFFICE', art: 'film', tag: 'US · FILM', head: 'Hunger Games prequel opens: $21M',
-    body: 'Previews second only to Catching Fire.', src: 'Lionsgate' },
-  { n: 15, key: 'CRICKET', art: 'cricket', tag: 'WELLINGTON · SPORT', head: 'Nicholls 175* as NZ make 368',
+  { n: 13, key: 'CRICKET', art: 'cricket', tag: 'WELLINGTON · SPORT', head: 'Nicholls 175* as NZ make 368',
     body: 'India reply 159-1 at stumps on day two.', src: 'NZ Herald' },
 ];
 const briefs = [
-  [16, 'Gaza', 'Israeli drone strikes kill 7', 'AJ'],
-  [17, 'Lebanon', 'Israeli strikes hit 4 districts', 'AA'],
-  [18, 'Yemen', 'Army claims 193 Houthis hit', 'Arab News'],
-  [19, 'Nigeria', 'Funeral boat sinks: 4+ dead', 'police'],
-  [20, 'Sudan', 'Army claims gains in W. Kordofan', 'army'],
-  [21, 'AfDB', '22 states in or near debt distress', 'AfDB'],
-  [22, 'Estonia', 'To shut Russia road border', 'govt'],
-  [23, 'Germany', 'Youth rally against conscription', 'AJ'],
-  [24, 'Berlin', 'Qatar pledges €15bn more', 'Merz'],
-  [25, 'Serbia', 'Belgrade mayor charged with assault', 'AJ'],
-  [26, 'UK', 'Retail sales +0.7%; borrowing £17bn', 'ONS'],
-  [27, 'Zaporizhzhia', 'Hospital strike kills 1', 'AJ'],
-  [28, 'Japan', 'October inflation 2.3%, core 2.2%', 'MIC'],
-  [29, 'S. Korea', 'Party backs impeaching top judge', 'SBS'],
-  [30, 'Australia', 'Xi hails "full turnaround" in ties', 'ABC'],
-  [31, 'Myanmar', 'Calls ICJ genocide ruling "unfair"', 'AJ'],
-  [32, 'Mexico', 'Sheinbaum leads Revolution parade', 'EFE'],
-  [33, 'Argentina', 'Country risk jumps to 1,070', 'Rava'],
-  [34, 'Florida', 'Floods: 17+ inches since Tuesday', 'AP'],
-  [35, 'New York', 'Mamdani: close Rikers by 2032', 'AJ'],
-  [36, 'New York', 'Indian man jailed over Sikh plot', 'court'],
-  [37, 'Haiti', 'El Salvador to help build 3 prisons', 'AP'],
-  [38, 'F1', 'Verstappen gets Las Vegas pole', 'FIA'],
-  [39, 'Football', 'Nations League: Spain v France', 'UEFA'],
-  [40, 'Tennis', 'ATP pay pot tops $350m from 2028', 'AFP'],
+  [14, 'Gaza', 'Israeli drone strikes kill at least 7 in central Gaza'],
+  [15, 'Lebanon', 'Israeli strikes hit 4 southern districts'],
+  [16, 'Nigeria', 'Funeral boat capsizes in Bayelsa: 4+ dead, 24 saved'],
+  [17, 'Sudan', 'Army claims RSF ousted from 10 sites in W. Kordofan'],
+  [18, 'AfDB', '22 African states in or near debt distress'],
+  [19, 'Estonia', 'To shut its Russia road border for 6 months'],
+  [20, 'Germany', 'Young people rally against conscription plans'],
+  [21, 'Serbia', 'Belgrade mayor charged with assaulting councillor'],
+  [22, 'UK', 'Retail sales +0.7% in October; borrowing £17bn'],
+  [23, 'India', 'Pakistani minister in Delhi, first since 2025 war'],
+  [24, 'Japan', 'October inflation 2.3%, core 2.2%'],
+  [25, 'S. Korea', 'Ruling party backs impeaching the chief justice'],
+  [26, 'Australia', 'Xi hails "full turnaround" in ties with Albanese'],
+  [27, 'Myanmar', 'Calls Thursday\'s ICJ genocide ruling "unfair"'],
+  [28, 'Mexico', 'Sheinbaum leads Revolution Day parade'],
+  [29, 'Argentina', 'Country risk index jumps to 1,070'],
+  [30, 'New York', 'Mayor Mamdani plans to close Rikers by 2032'],
+  [31, 'US', 'Hunger Games prequel opens with $21M in previews'],
+  [32, 'Football', 'Nations League draw: Spain v France'],
 ];
 const numbers = [
   ['8', 'killed in Kyiv and Lviv'], ['3', 'Kyiv bridges hit'], ['300,000+', 'evacuated for Akvan'],
@@ -176,15 +166,15 @@ const timeline = [
   ['overnight', 'Missiles hit Kyiv'], ['02:00', 'Akvan landfall'], ['05:30', 'Taiwan closes −6.2%'],
   ['06:30', 'Tokyo closes −5.1%'], ['07:00', 'UK retail +0.7%'], ['11:00', 'Nations League draw'], ['21:00', 'S&P 500 closes −3.7%'],
 ];
-const regionOf = { Europe: [1, 4, 5, 9, 22, 23, 24, 25, 26, 27, 39], 'Mid East': [6, 7, 10, 16, 17, 18],
-  'Asia-Pac': [2, 12, 15, 28, 29, 30, 31], Africa: [11, 19, 20, 21], Americas: [3, 14, 32, 33, 34, 35, 36, 37, 38], Global: [8, 13, 40] };
+const regionOf = { Europe: [1, 4, 5, 9, 19, 20, 21, 22, 32], 'Mid East': [6, 7, 10, 14, 15],
+  'Asia-Pac': [2, 13, 23, 24, 25, 26, 27], Africa: [11, 16, 17, 18], Americas: [3, 28, 29, 30, 31], Global: [8, 12] };
 const regionColor = { Europe: '#1f4e9c', 'Mid East': '#b5651d', 'Asia-Pac': '#c8102e', Americas: '#2e8b57', Africa: '#7b3fa0', Global: '#555' };
 const total = leads.length + tiles.length + briefs.length;
 const counted = Object.values(regionOf).flat();
 if (counted.length !== total || new Set(counted).size !== total) throw new Error(`region map covers ${counted.length} of ${total}`);
 
 // ---------- locator map: coarse coastlines, equirectangular ----------
-const MAP = { w: 250, h: 128, lon0: -125, lon1: 186, lat0: 72, lat1: -52 };
+const MAP = { w: 300, h: 128, lon0: -125, lon1: 186, lat0: 72, lat1: -52 };
 const px = (lon, lat) => [((lon - MAP.lon0) / (MAP.lon1 - MAP.lon0)) * MAP.w, ((MAP.lat0 - lat) / (MAP.lat0 - MAP.lat1)) * MAP.h];
 const land = [
   [[-168, 65], [-140, 70], [-95, 72], [-80, 63], [-60, 55], [-53, 47], [-66, 44], [-75, 35], [-81, 25], [-90, 30], [-97, 26], [-97, 18], [-87, 15], [-80, 8], [-84, 10], [-92, 15], [-105, 20], [-112, 30], [-118, 34], [-124, 40], [-124, 48], [-135, 58], [-150, 60], [-165, 55]],
@@ -198,8 +188,7 @@ const land = [
   [[172, -34], [178, -38], [174, -41], [170, -46], [167, -46], [172, -41]],
 ];
 const pins = [[1, 30.5, 50.4], [2, 84.9, 19.3], [3, -74, 40.7], [4, 4.4, 50.8], [5, 22.6, 51.2], [6, 56.2, 26.2], [7, 42.9, 14.8],
-  [8, 30.7, 36.9], [9, 12.5, 41.9], [10, 44.2, 32.9], [11, 35.6, 2.3], [12, 77.2, 28.6], [13, 2.2, 41.4], [14, -118.2, 34.1],
-  [15, 174.8, -41.3]];
+  [8, 30.7, 36.9], [9, 12.5, 41.9], [10, 44.2, 32.9], [11, 35.6, 2.3], [12, 2.2, 41.4], [13, 174.8, -41.3]];
 const regionByStory = Object.fromEntries(Object.entries(regionOf).flatMap(([r, ns]) => ns.map((n) => [n, r])));
 const mapSvg = `<svg viewBox="0 0 ${MAP.w} ${MAP.h}" font-family="Segoe UI, Arial">
   <rect width="${MAP.w}" height="${MAP.h}" fill="#203a55"/>
@@ -229,26 +218,25 @@ h1{font-family:Georgia,serif;font-size:66px;line-height:68px;font-weight:900;tex
 .bar{display:flex;margin:5px 14px 0;height:15px;font-size:9.5px;font-weight:800;color:#fff}
 .bar i{font-style:normal;text-align:center;line-height:15px}
 .grid{display:grid;gap:7px;margin:7px 14px 0}
-.g3{grid-template-columns:repeat(3,1fr)}.g6{grid-template-columns:repeat(6,1fr);gap:6px}
+.g3{grid-template-columns:repeat(3,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
 .card{background:#fff;border:1px solid #d8d2c4;overflow:hidden}
 .pic{position:relative}.pic svg{display:block;width:100%}
-.lead .pic svg{height:108px}.small .pic svg{height:58px}
+.lead .pic svg{height:106px}.small .pic svg{height:58px}
 .key{position:absolute;left:6px;top:6px;background:#c8102e;color:#fff;font-weight:900;letter-spacing:.5px;display:flex;align-items:center;gap:6px;padding:2px 8px 2px 3px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .key i{font-style:normal;background:#fff;color:#c8102e;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px}
-.lead .key{font-size:19px}.small .key{font-size:11.5px;top:auto;bottom:3px;left:3px;padding:1px 5px 1px 2px;gap:4px}
-.small .key i{width:15px;height:15px;font-size:9.5px}
-.tag{font-size:10px;font-weight:800;color:#1f4e9c;letter-spacing:.6px;padding:4px 7px 0}
-.small .tag{font-size:8.5px;letter-spacing:.3px;padding:3px 5px 0;white-space:nowrap;overflow:hidden}
+.lead .key{font-size:19px}.small .key{font-size:12.5px;top:4px;left:4px;padding:1px 6px 1px 2px}
+.small .key i{width:16px;height:16px;font-size:10px}
+.tag{font-size:10px;font-weight:800;color:#1f4e9c;letter-spacing:.6px;padding:4px 7px 0;white-space:nowrap;overflow:hidden}
 .head{font-family:Georgia,serif;font-weight:900;padding:1px 7px 0}
-.lead .head{font-size:20px;line-height:22px}.small .head{font-size:13.5px;line-height:15px;padding:1px 5px 0}
-.body{font-size:11.5px;line-height:14px;color:#333;padding:2px 7px 5px}.small .body{font-size:10.5px;line-height:12.5px;padding:2px 5px 4px}
+.lead .head{font-size:20px;line-height:22px}.small .head{font-size:14.5px;line-height:16px}
+.body{font-size:11.5px;line-height:14px;color:#333;padding:2px 7px 5px}.small .body{font-size:11px;line-height:13px}
 .src{color:#888;font-size:10px;white-space:nowrap}.src:before{content:"— "}
-.bottom{display:grid;grid-template-columns:250px minmax(0,1fr);gap:10px;margin:7px 14px 0}
+.bottom{display:grid;grid-template-columns:300px minmax(0,1fr);gap:10px;margin:7px 14px 0}
 .also{min-width:0}
 .mapbox h3,.also h3{font-size:10.5px;letter-spacing:1px;font-weight:900;border-bottom:2px solid #151515;margin-bottom:3px;white-space:nowrap}
-.mapbox svg{display:block;width:250px;height:128px}
-.also ol{columns:3;column-gap:10px;list-style:none}
-.also li{font-size:11px;line-height:13.5px;padding:1.5px 0;break-inside:avoid;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mapbox svg{display:block;width:300px;height:128px}
+.also ol{columns:2;column-gap:12px;list-style:none}
+.also li{font-size:11.5px;line-height:14px;padding:1.5px 0;break-inside:avoid;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .also li i{font-style:normal;display:inline-block;min-width:17px;height:13px;color:#fff;font-size:9px;font-weight:800;text-align:center;margin-right:3px;border-radius:2px}
 .also li b{font-weight:800}.also li em{color:#888;font-style:normal;font-size:9.5px}
 .dc{margin-top:5px;border:2px solid #c8102e;padding:3px 6px;font-size:10.5px;line-height:12.5px;color:#333}
@@ -262,10 +250,10 @@ footer{position:absolute;left:14px;right:14px;bottom:4px;font-size:10px;color:#5
 <div class="nums">${numbers.map(([n, l]) => `<div><b>${n}</b><span>${esc(l)}</span></div>`).join('')}</div>
 <div class="bar">${Object.entries(regionOf).map(([r, ns]) => `<i style="width:${(ns.length / total) * 100}%;background:${regionColor[r]}">${r} ${ns.length}</i>`).join('')}</div>
 <div class="grid g3">${leads.map((s) => card(s, 'lead')).join('')}</div>
-<div class="grid g6">${tiles.slice(0, 6).map((s) => card(s, 'small')).join('')}</div>
-<div class="grid g6">${tiles.slice(6).map((s) => card(s, 'small')).join('')}</div>
+<div class="grid g5">${tiles.slice(0, 5).map((s) => card(s, 'small')).join('')}</div>
+<div class="grid g5">${tiles.slice(5).map((s) => card(s, 'small')).join('')}</div>
 <div class="bottom">
-  <div class="mapbox"><h3>WHERE IT HAPPENED · stories 1–15</h3>${mapSvg}</div>
+  <div class="mapbox"><h3>WHERE IT HAPPENED · stories 1–13</h3>${mapSvg}</div>
   <div class="also"><h3>ALSO ON FRIDAY 20 NOVEMBER — ${briefs.length} MORE</h3>
     <ol>${briefs.map(([n, p, t, s]) => `<li><i style="background:${regionColor[regionByStory[n]]}">${n}</i><b>${esc(p)}</b> ${esc(t)}</li>`).join('')}</ol>
     <div class="dc"><b>DATE CHECK</b> Left out as earlier news: the ICJ's Rohingya ruling, Anthropic's IPO day, the Trump–Putin–Xi statement, the US Senate energy vote, Uganda's Ebola rally ban (all 19 Nov) and the Kerch Bridge strikes (16–19 Nov). Not yet: COP31's final text, the Las Vegas race.</div>
