@@ -1,236 +1,252 @@
-// Builds the front page for Friday 20 November 2026 as HTML + inline SVG, then screenshots it
-// with headless Edge to ../entry.png (1024x1024). Run: node tools/render.mjs
+// v2 front page for Friday 20 November 2026: HTML + inline SVG drawn here, screenshotted by headless Edge
+// to ../entry.png (1024x1024). Run: node tools/render.mjs
+// Every story was checked to have happened, or been first reported, on 20 Nov 2026; items that turned out
+// to be Thursday 19 Nov news are listed in the DATE CHECK box instead of being shown as the day's news.
 import { writeFileSync, mkdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
-// ---------- drawings (flat vector, 300x120 viewBox) ----------
+// ---------- drawings: every one on a 300x120 canvas ----------
+const flagUK = (x, y, w, h) => `<g transform="translate(${x},${y}) scale(${w / 60},${h / 30})">
+  <rect width="60" height="30" fill="#012169"/><path d="M0 0L60 30M60 0L0 30" stroke="#fff" stroke-width="6"/>
+  <path d="M0 0L60 30M60 0L0 30" stroke="#c8102e" stroke-width="2"/><path d="M30 0V30M0 15H60" stroke="#fff" stroke-width="10"/>
+  <path d="M30 0V30M0 15H60" stroke="#c8102e" stroke-width="6"/></g>`;
+const flagEU = (x, y, w, h) => `<g transform="translate(${x},${y})"><rect width="${w}" height="${h}" fill="#003399"/>
+  ${Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * 2 * Math.PI; return `<circle cx="${w / 2 + h * 0.32 * Math.cos(a)}" cy="${h / 2 + h * 0.32 * Math.sin(a)}" r="${h * 0.045}" fill="#ffcc00"/>`; }).join('')}</g>`;
+const tri = (x, y, w, h, cols, vertical = true) => cols.map((c, i) => vertical
+  ? `<rect x="${x + (i * w) / cols.length}" y="${y}" width="${w / cols.length}" height="${h}" fill="${c}"/>`
+  : `<rect x="${x}" y="${y + (i * h) / cols.length}" width="${w}" height="${h / cols.length}" fill="${c}"/>`).join('');
+
 const art = {
-  // the lead's drawing is wider: 540x110
-  markets: `
-    <rect width="540" height="110" fill="#fff4f2"/>
-    ${[18, 42, 66, 90].map((y) => `<line x1="10" x2="530" y1="${y}" y2="${y}" stroke="#f0d4cf"/>`).join('')}
-    <polyline points="12,16 50,22 84,18 118,34 150,30 184,50 214,46 244,68 270,64 296,94" fill="none" stroke="#c8102e" stroke-width="5" stroke-linejoin="round"/>
-    <polygon points="286,84 302,102 278,100" fill="#c8102e"/>
-    ${[['NASDAQ', '−5.3%'], ['NVIDIA', '−14%'], ['NIKKEI', '−5.1%'], ['KOSPI', '−5.2%']].map(([n, v], i) => `
-      <g transform="translate(${318 + (i % 2) * 108},${8 + Math.floor(i / 2) * 50})">
-        <rect width="100" height="44" rx="5" fill="#fff" stroke="#c8102e" stroke-width="1.5"/>
-        <text x="50" y="17" font-size="12" font-weight="800" text-anchor="middle" fill="#111">${n}</text>
-        <text x="50" y="37" font-size="18" font-weight="900" text-anchor="middle" fill="#c8102e">▼ ${v}</text></g>`).join('')}`,
-  // mini-card drawings: 120x100
-  m_nigeria: `
-    <rect width="120" height="100" fill="#dbeef0"/>
-    <path d="M0 52 q15 -6 30 0 t30 0 t30 0 t30 0 V100 H0Z" fill="#2f7f8c"/>
-    <path d="M24 56 L96 42 L90 60 L30 70 Z" fill="#8b5a2b" transform="rotate(16 60 56)"/>
-    <circle cx="18" cy="62" r="5" fill="#f2c94c"/><circle cx="102" cy="66" r="5" fill="#f2c94c"/>
-    <path d="M8 8 h33 v24 h-33z" fill="#008751"/><path d="M19 8 h11 v24 h-11z" fill="#fff"/>`,
-  m_iraq: `
-    <rect width="120" height="100" fill="#efe6d2"/>
-    <rect x="8" y="8" width="42" height="27" fill="#fff"/><rect x="8" y="8" width="42" height="9" fill="#ce1126"/><rect x="8" y="26" width="42" height="9" fill="#111"/>
-    <rect y="76" width="120" height="24" fill="#cdb889"/>
-    <rect x="34" y="52" width="62" height="24" rx="4" fill="#5b6b3a"/><rect x="52" y="40" width="26" height="14" rx="3" fill="#4b5a2e"/>
-    <path d="M78 46 H104" stroke="#4b5a2e" stroke-width="4"/>
-    ${[42, 56, 70, 84].map((x) => `<circle cx="${x}" cy="78" r="6" fill="#222"/>`).join('')}`,
-  m_gaza: `
-    <rect width="120" height="100" fill="#e9e4dc"/>
-    <path d="M0 100 V70 l12 -8 l10 10 v-20 h18 l6 12 l10 -16 h16 v24 l12 -6 l14 10 l22 -4 V100Z" fill="#9b8f80"/>
-    <path d="M60 18 h26 l-6 6 h-14z" fill="#444"/><path d="M52 14 h42" stroke="#444" stroke-width="3"/>
-    <path d="M72 26 l-10 30" stroke="#444" stroke-width="2" stroke-dasharray="3 3"/>
-    <circle cx="60" cy="60" r="9" fill="#ff7a2f"/>`,
-  m_strike: `
-    <rect width="120" height="100" fill="#f3efe6"/>
-    <rect x="6" y="8" width="16" height="30" fill="#009246"/><rect x="22" y="8" width="16" height="30" fill="#fff"/><rect x="38" y="8" width="16" height="30" fill="#ce2b37"/>
-    ${[[30, 54], [62, 48], [94, 56]].map(([x, y]) => `<path d="M${x} ${y + 18} V${y + 42}" stroke="#555" stroke-width="3"/><rect x="${x - 16}" y="${y}" width="32" height="20" fill="#fff" stroke="#c8102e" stroke-width="2"/><circle cx="${x}" cy="${y + 48}" r="7" fill="#7a5c48"/>`).join('')}
-    <text x="62" y="62" font-size="9" font-weight="900" text-anchor="middle" fill="#c8102e">SCIOPERO</text>`,
-  euuk: `
-    <rect width="300" height="120" fill="#eef3ff"/>
-    <rect x="22" y="18" width="104" height="66" fill="#003399"/>
-    ${Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2; return `<circle cx="${74 + 22 * Math.cos(a)}" cy="${51 + 22 * Math.sin(a)}" r="3.2" fill="#ffcc00"/>`; }).join('')}
-    <rect x="174" y="18" width="104" height="66" fill="#012169"/>
-    <path d="M174 18 L278 84 M278 18 L174 84" stroke="#fff" stroke-width="12"/>
-    <path d="M174 18 L278 84 M278 18 L174 84" stroke="#c8102e" stroke-width="4"/>
-    <path d="M226 18 V84 M174 51 H278" stroke="#fff" stroke-width="18"/>
-    <path d="M226 18 V84 M174 51 H278" stroke="#c8102e" stroke-width="10"/>
-    <path d="M118 100 q32 -26 64 0" fill="none" stroke="#333" stroke-width="3"/>
-    <ellipse cx="128" cy="102" rx="16" ry="9" fill="#e7b48f"/><ellipse cx="172" cy="102" rx="16" ry="9" fill="#c98f6b"/>
-    <text x="150" y="60" font-size="22" font-weight="900" text-anchor="middle" fill="#111">⇄</text>`,
-  ukraine: `
-    <rect width="300" height="120" fill="#1d2433"/>
-    ${[[40, 20], [90, 12], [150, 26], [210, 10], [260, 22]].map(([x, y]) => `<path d="M${x} ${y} l18 34" stroke="#ffb347" stroke-width="3"/><circle cx="${x + 18}" cy="${y + 34}" r="3" fill="#ffdd88"/>`).join('')}
-    <rect x="0" y="86" width="300" height="34" fill="#2c3e5c"/>
-    <path d="M10 84 H118 M170 84 H292" stroke="#c9c9c9" stroke-width="7"/>
-    ${[20, 60, 100, 180, 220, 260].map((x) => `<rect x="${x}" y="84" width="6" height="30" fill="#9aa3b2"/>`).join('')}
-    <path d="M118 84 l14 22 M170 84 l-12 24" stroke="#c9c9c9" stroke-width="6"/>
-    <circle cx="144" cy="78" r="16" fill="#ff7a2f" opacity=".85"/><circle cx="144" cy="78" r="8" fill="#ffd24a"/>
-    <text x="144" y="56" font-size="11" font-weight="700" text-anchor="middle" fill="#fff">KERCH</text>`,
-  poland: `
-    <rect width="300" height="120" fill="#e8f3d8"/>
-    <rect y="70" width="300" height="50" fill="#a7c46a"/>
-    ${[0, 1, 2, 3, 4].map((i) => `<path d="M0 ${80 + i * 9} H300" stroke="#93b058" stroke-width="2"/>`).join('')}
-    <ellipse cx="170" cy="84" rx="34" ry="9" fill="#6b4a2b"/>
-    <path d="M120 10 L166 78" stroke="#555" stroke-width="7" stroke-linecap="round"/>
-    <path d="M114 4 l10 4 l-4 8z" fill="#555"/>
-    <rect x="18" y="14" width="64" height="40" fill="#fff" stroke="#bbb"/><rect x="18" y="34" width="64" height="20" fill="#dc143c"/>
-    <text x="238" y="40" font-size="13" font-weight="800" text-anchor="middle" fill="#333">Kh-101</text>
-    <text x="238" y="56" font-size="11" text-anchor="middle" fill="#333">Lublin region</text>`,
-  hormuz: `
-    <rect width="300" height="120" fill="#cfe7f5"/>
-    <rect y="74" width="300" height="46" fill="#3c7fb1"/>
-    <path d="M40 74 H250 L232 98 H58 Z" fill="#7b2d26"/>
-    <rect x="200" y="54" width="34" height="20" fill="#e6e6e6"/>
-    <path d="M90 74 q8 -40 24 -18 q6 -30 22 -6 q10 -26 20 4 z" fill="#ff7a2f"/>
-    <path d="M100 30 q20 -26 50 -14 q22 -14 40 4" fill="none" stroke="#666" stroke-width="10" opacity=".55" stroke-linecap="round"/>
-    <text x="268" y="30" font-size="12" font-weight="800" text-anchor="middle" fill="#123">OMAN</text>`,
-  yemen: `
-    <rect width="300" height="120" fill="#f6ecd6"/>
-    <path d="M0 96 H300 V120 H0Z" fill="#d9c08e"/>
-    ${[[40, 70], [80, 60], [120, 74]].map(([x, h]) => `<rect x="${x}" y="${96 - h + 30}" width="30" height="${h - 30}" fill="#b48a5a"/>`).join('')}
-    <path d="M190 30 l30 -6 l-6 8 l26 2 l-26 4 l6 8 z" fill="#3a4a5c"/>
-    <path d="M150 50 l-22 30" stroke="#3a4a5c" stroke-width="3" stroke-dasharray="4 3"/>
-    <circle cx="126" cy="84" r="14" fill="#ff7a2f"/>
-    <text x="250" y="80" font-size="12" font-weight="800" text-anchor="middle" fill="#333">HODEIDAH</text>
-    <text x="250" y="94" font-size="10" text-anchor="middle" fill="#333">Sanaa · Saada · Taiz</text>`,
-  cop: `
-    <rect width="300" height="120" fill="#e6f5ee"/>
-    <circle cx="70" cy="62" r="42" fill="#2e8bc0"/>
-    <path d="M50 34 q16 8 10 24 q-14 6 -20 -6z M76 52 q20 -4 24 14 q-6 16 -22 10z M58 82 q12 -2 14 10 q-8 6 -16 0z" fill="#3fae5a"/>
-    <circle cx="208" cy="54" r="30" fill="#fff" stroke="#333" stroke-width="3"/>
-    <path d="M208 54 V32 M208 54 L226 64" stroke="#c8102e" stroke-width="4" stroke-linecap="round"/>
-    <text x="208" y="106" font-size="13" font-weight="800" text-anchor="middle" fill="#123">OVERTIME</text>`,
-  nigeria: `
-    <rect width="300" height="120" fill="#dbeef0"/>
-    <path d="M0 64 q30 -8 60 0 t60 0 t60 0 t60 0 t60 0 V120 H0Z" fill="#2f7f8c"/>
-    <path d="M100 70 L210 52 L200 74 L112 88 Z" fill="#8b5a2b" transform="rotate(14 155 70)"/>
-    ${[60, 236, 262].map((x) => `<circle cx="${x}" cy="76" r="6" fill="#f2c94c"/>`).join('')}
-    <path d="M24 30 h40 v40 h-40z" fill="#008751"/><path d="M37 30 h14 v40 h-14z" fill="#fff"/>
-    <text x="240" y="30" font-size="12" font-weight="800" text-anchor="middle" fill="#123">BAYELSA</text>`,
+  kyiv: `<rect width="300" height="120" fill="#141b2b"/>
+    ${[[200, 6], [236, 2], [268, 10]].map(([x, y]) => `<path d="M${x} ${y} L${x - 40} ${y + 50}" stroke="#ffb347" stroke-width="2.5" stroke-dasharray="6 4"/><circle cx="${x - 40}" cy="${y + 50}" r="3" fill="#ffe08a"/>`).join('')}
+    ${[30, 48, 62, 90, 104, 130].map((x, i) => `<rect x="${x}" y="${40 + (i % 3) * 8}" width="12" height="${46 - (i % 3) * 8}" fill="#2b3550"/>`).join('')}
+    <path d="M0 92 Q150 82 300 92 V120 H0Z" fill="#1f4f7a"/>
+    <path d="M14 84 H286" stroke="#b8c0cc" stroke-width="6"/>
+    ${[40, 100, 160, 220, 270].map((x) => `<rect x="${x}" y="84" width="6" height="22" fill="#8b95a5"/>`).join('')}
+    ${[70, 150, 232].map((x) => `<circle cx="${x}" cy="80" r="12" fill="#ff7a2f" opacity=".9"/><circle cx="${x}" cy="80" r="5" fill="#ffe08a"/>`).join('')}
+    <text x="290" y="114" font-size="10" fill="#9fb3cc" text-anchor="end">DNIPRO</text>`,
+  cyclone: `<rect width="300" height="120" fill="#2b6a9e"/>
+    <path d="M0 0 H118 Q100 30 112 60 Q96 92 70 120 H0Z" fill="#cfe0b0"/>
+    <text x="12" y="96" font-size="13" font-weight="800" fill="#33472a">ODISHA</text><text x="12" y="110" font-size="10" fill="#33472a">INDIA</text>
+    <circle cx="111" cy="58" r="5" fill="#c8102e" stroke="#fff" stroke-width="2"/>
+    <text x="104" y="76" font-size="10" font-weight="700" fill="#fff" text-anchor="end">Gopalpur</text>
+    ${[44, 32, 20, 9].map((r, i) => `<path d="M${215 - r} 60 a${r} ${r} 0 1 1 ${r} ${r}" fill="none" stroke="#fff" stroke-width="${4 - i * 0.5}" opacity=".85"/>`).join('')}
+    <circle cx="215" cy="60" r="5" fill="#fff"/>
+    <path d="M172 60 L124 58" stroke="#fff" stroke-width="2" stroke-dasharray="4 4"/>
+    <text x="290" y="114" font-size="10" fill="#d6e8f5" text-anchor="end">BAY OF BENGAL</text>`,
+  rout: `<rect width="300" height="120" fill="#16181d"/>
+    ${[20, 45, 70, 95].map((y) => `<line x1="8" x2="160" y1="${y}" y2="${y}" stroke="#2c3038"/>`).join('')}
+    <polyline points="10,22 34,26 54,20 78,40 98,36 118,60 136,58 156,96" fill="none" stroke="#ff4d4d" stroke-width="4" stroke-linejoin="round"/>
+    <polygon points="148,86 162,104 140,100" fill="#ff4d4d"/>
+    ${[['S&P 500', '−3.7%'], ['Nasdaq', '−5.3%'], ['Nvidia', '−14%'], ['Taiex', '−6.2%'], ['Kospi', '−5.2%']].map(([n, v], i) => `
+      <text x="176" y="${22 + i * 21}" font-size="13" font-weight="700" fill="#e8e8e8">${n}</text>
+      <text x="292" y="${22 + i * 21}" font-size="14" font-weight="900" fill="#ff5c5c" text-anchor="end">${v}</text>`).join('')}`,
+  euuk: `<rect width="300" height="120" fill="#e9eefb"/>${flagEU(20, 18, 110, 70)}${flagUK(170, 18, 110, 70)}
+    <rect x="120" y="70" width="60" height="30" rx="14" fill="#fff" stroke="#333" stroke-width="2"/>
+    <path d="M132 85 h36 M150 76 v18" stroke="#333" stroke-width="3"/>`,
+  poland: `<rect width="300" height="120" fill="#e5f0d6"/><rect y="70" width="300" height="50" fill="#9fbf62"/>
+    ${[78, 88, 98, 108].map((y) => `<path d="M0 ${y} H300" stroke="#8bab50" stroke-width="2"/>`).join('')}
+    <ellipse cx="190" cy="86" rx="34" ry="9" fill="#5e4027"/>
+    <path d="M128 12 L184 80" stroke="#59606b" stroke-width="8" stroke-linecap="round"/><path d="M120 6 l14 4 l-6 10z" fill="#59606b"/>
+    ${tri(16, 14, 66, 42, ['#fff', '#dc143c'], false)}<rect x="16" y="14" width="66" height="42" fill="none" stroke="#bbb"/>`,
+  hormuz: `<rect width="300" height="120" fill="#cde6f4"/><rect y="74" width="300" height="46" fill="#336f9e"/>
+    <path d="M30 74 H250 L232 98 H48 Z" fill="#7b2d26"/><rect x="204" y="52" width="32" height="22" fill="#e6e6e6"/>
+    <path d="M80 74 q8 -44 26 -18 q8 -30 24 -4 q12 -28 22 6z" fill="#ff7a2f"/><path d="M100 72 q6 -20 16 -8 q6 -14 12 4z" fill="#ffd24a"/>
+    <path d="M96 30 q24 -28 56 -14 q24 -16 46 6" fill="none" stroke="#666" stroke-width="12" opacity=".45" stroke-linecap="round"/>`,
+  yemen: `<rect width="300" height="120" fill="#f4e8cf"/><rect y="96" width="300" height="24" fill="#d6bb86"/>
+    ${[[40, 36], [76, 50], [112, 30]].map(([x, h]) => `<rect x="${x}" y="${96 - h}" width="30" height="${h}" fill="#b08654"/><rect x="${x + 10}" y="${100 - h}" width="8" height="8" fill="#f4e8cf"/>`).join('')}
+    <path d="M196 26 l34 -6 l-6 8 l28 2 l-28 4 l6 8z" fill="#33414f"/>
+    <path d="M196 34 L142 80" stroke="#33414f" stroke-width="2.5" stroke-dasharray="5 4"/><circle cx="138" cy="84" r="14" fill="#ff7a2f"/>`,
+  cop: `<rect width="300" height="120" fill="#e4f3ea"/>
+    <circle cx="80" cy="60" r="44" fill="#2e86c1"/>
+    <path d="M56 30 q18 8 12 26 q-16 6 -22 -6z M86 50 q22 -4 26 14 q-6 18 -24 10z M64 84 q14 -2 16 10 q-8 6 -18 0z" fill="#3aa856"/>
+    <circle cx="214" cy="58" r="34" fill="#fff" stroke="#333" stroke-width="3"/>
+    <path d="M214 58 V32 M214 58 L236 70" stroke="#c8102e" stroke-width="4" stroke-linecap="round"/>
+    ${Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * 2 * Math.PI; return `<circle cx="${214 + 28 * Math.cos(a)}" cy="${58 + 28 * Math.sin(a)}" r="1.8" fill="#333"/>`; }).join('')}`,
+  strike: `<rect width="300" height="120" fill="#f3eee4"/>${tri(16, 12, 72, 46, ['#009246', '#fff', '#ce2b37'])}
+    ${[[130, 36], [182, 28], [234, 38]].map(([x, y]) => `<path d="M${x} ${y + 22} V${y + 56}" stroke="#555" stroke-width="3"/><rect x="${x - 24}" y="${y}" width="48" height="24" fill="#fff" stroke="#c8102e" stroke-width="2"/><circle cx="${x}" cy="${y + 66}" r="9" fill="#6e5544"/><rect x="${x - 10}" y="${y + 74}" width="20" height="24" rx="6" fill="#6e5544"/>`).join('')}
+    <text x="182" y="46" font-size="10" font-weight="900" text-anchor="middle" fill="#c8102e">SCIOPERO</text>`,
+  iraq: `<rect width="300" height="120" fill="#efe6d1"/>${tri(16, 12, 70, 45, ['#ce1126', '#fff', '#111'], false)}
+    <rect y="92" width="300" height="28" fill="#ccb683"/>
+    ${[120, 210].map((x) => `<rect x="${x}" y="62" width="70" height="28" rx="5" fill="#5b6b3a"/><rect x="${x + 18}" y="48" width="30" height="16" rx="3" fill="#4b5a2e"/><path d="M${x + 48} 55 H${x + 78}" stroke="#4b5a2e" stroke-width="4"/>${[8, 24, 40, 56].map((d) => `<circle cx="${x + d + 3}" cy="92" r="7" fill="#222"/>`).join('')}`).join('')}`,
+  boat: `<rect width="300" height="120" fill="#d9edf0"/>
+    <path d="M0 60 q25 -8 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V120 H0Z" fill="#2c7c8a"/>
+    <path d="M100 66 L220 48 L210 72 L112 86 Z" fill="#8b5a2b" transform="rotate(16 160 66)"/>
+    ${[70, 246, 270].map((x) => `<circle cx="${x}" cy="74" r="6" fill="#f2c94c"/>`).join('')}
+    ${tri(16, 12, 66, 42, ['#008751', '#fff', '#008751'])}`,
+  delhi: `<rect width="300" height="120" fill="#f1ece2"/>
+    <g>${tri(20, 20, 90, 60, ['#fff'])}<rect x="42" y="20" width="68" height="60" fill="#01411c"/><circle cx="80" cy="50" r="15" fill="#fff"/><circle cx="86" cy="46" r="14" fill="#01411c"/></g>
+    <path d="M122 50 H178" stroke="#333" stroke-width="3" stroke-dasharray="6 4"/><path d="M172 42 l10 8 l-10 8" fill="none" stroke="#333" stroke-width="3"/>
+    ${tri(190, 20, 90, 60, ['#ff9933', '#fff', '#138808'], false)}<circle cx="235" cy="50" r="7" fill="none" stroke="#000080" stroke-width="2"/>
+    <text x="150" y="104" font-size="12" font-weight="800" text-anchor="middle" fill="#333">SCO FORUM · NEW DELHI</text>`,
+  f1: `<rect width="300" height="120" fill="#1b1430"/>
+    ${Array.from({ length: 9 }, (_, i) => `<rect x="${i * 34}" y="96" width="17" height="8" fill="${i % 2 ? '#fff' : '#111'}"/><rect x="${i * 34 + 17}" y="104" width="17" height="8" fill="${i % 2 ? '#fff' : '#111'}"/>`).join('')}
+    <path d="M60 80 h150 l16 -8 h20 l-6 12 h-190z" fill="#1e41ff"/><rect x="40" y="70" width="30" height="16" fill="#1e41ff"/>
+    ${[90, 210].map((x) => `<circle cx="${x}" cy="88" r="12" fill="#111" stroke="#555" stroke-width="3"/>`).join('')}
+    <text x="150" y="40" font-size="26" font-weight="900" text-anchor="middle" fill="#ffd400">P1</text>
+    ${[30, 260].map((x) => `<circle cx="${x}" cy="24" r="10" fill="#ffd400" opacity=".7"/>`).join('')}`,
 };
 
-// ---------- stories (all from Friday 20 November 2026) ----------
-const lead = {
-  tag: 'MARKETS · GLOBAL', art: 'markets',
-  head: 'AI sell-off: Nasdaq plunges 5.3%, S&P 500 falls into correction',
-  body: 'Nvidia −14% after a Reuters report that SEC staff are examining its accounting; chip index −10.7%. Asia fell first: Nikkei −5.1%, Kospi −5.2%, Taiex −6.2%. Anthropic shares slide after their Nasdaq debut.',
-};
-const tiles = [
-  { tag: 'EUROPE · BRUSSELS', art: 'euuk', head: 'EU and UK seal "reset" deal at summit',
-    body: 'Youth scheme for 100,000 a year, food-rules and carbon-market links; UK says +0.5% to GDP.' },
-  { tag: 'UKRAINE · RUSSIA', art: 'ukraine', head: 'Russian barrage kills 8; Kerch Bridge road span down',
-    body: 'Zelenskyy: 400+ drones, 110+ missiles fired overnight; 6 dead in Kyiv, 2 in Lviv. Ukraine hits Crimea bridge.' },
-  { tag: 'POLAND · NATO', art: 'poland', head: 'Russian missile lands in Polish field',
-    body: 'Kh-101 strikes a field near Nowy Lipowiec, no casualties; Tusk calls 3 airspace breaches a "provocation".' },
-  { tag: 'GULF · HORMUZ', art: 'hormuz', head: 'Tanker hit and on fire in Strait of Hormuz',
-    body: 'Damaged off Khasab, Oman, say UKMTO and Iran\'s IRGC navy, as the US tightens its Iran blockade.' },
-  { tag: 'YEMEN · SAUDI ARABIA', art: 'yemen', head: 'Saudi-led coalition strikes Houthi targets',
-    body: 'Raids on Hodeidah, Sanaa, Saada and Taiz; Houthis threaten Saudi ports and warn airlines away.' },
-  { tag: 'CLIMATE · TÜRKİYE', art: 'cop', head: 'COP31 climate talks run into overtime',
-    body: 'About 200 nations deadlocked in Antalya; latest draft drops fossil-fuel wording.' },
+// ---------- stories ----------
+const leads = [
+  { n: 1, key: 'KYIV', art: 'kyiv', tag: 'KYIV, UKRAINE · WAR',
+    head: 'Russian missiles hit three Kyiv bridges; 8 killed',
+    body: 'Ballistic missiles damaged the Podilskyi, Darnytskyi and Southern bridges, the mayor says. 6 dead in Kyiv, 2 in Lviv, 28 hurt; Kyiv says 400+ drones, 110+ missiles. Power cut in Kyiv and 10 regions.',
+    src: 'Ukraine govt, Al Jazeera' },
+  { n: 2, key: 'CYCLONE AKVAN', art: 'cyclone', tag: 'ODISHA, INDIA · WEATHER',
+    head: 'Cyclone Akvan comes ashore near Gopalpur',
+    body: 'Landfall began about 02:00 UTC with 70–80 km/h winds, gusts to 90. Over 300,000 people moved to shelters; no deaths reported. Dozens of trains cancelled.',
+    src: 'IMD, Odisha govt' },
+  { n: 3, key: 'AI SELL-OFF', art: 'rout', tag: 'NEW YORK · TAIPEI · SEOUL · MARKETS',
+    head: 'AI rout pushes S&P 500 into a correction',
+    body: 'Nasdaq −5.3%; Nvidia −14% after a report that SEC staff are examining its accounting. Asia fell first: Taiwan −6.2%, Seoul −5.2%, Tokyo −5.1%. Anthropic down ~9.5% on day two.',
+    src: 'AP, Reuters, Al Jazeera' },
 ];
-const minis = [
-  { tag: 'NIGERIA', art: 'm_nigeria', head: 'Funeral boat capsizes in Bayelsa',
-    body: 'Mourners\' boat overturns; up to 30 feared dead, many missing.' },
-  { tag: 'IRAQ', art: 'm_iraq', head: 'Troops enter militia stronghold',
-    body: 'Forces deploy in Kataib Hezbollah\'s Jurf al-Sakhar under a deal.' },
-  { tag: 'GAZA', art: 'm_gaza', head: 'Israeli drone strikes kill 7',
-    body: 'At least seven Palestinians killed in central Gaza, four in Bureij.' },
-  { tag: 'ITALY · EUROPE', art: 'm_strike', head: 'Italy holds general strike',
-    body: 'Protests over wages and living costs in cities across Europe.' },
+const tiles = [
+  { n: 4, key: 'UK–EU DEAL', art: 'euuk', tag: 'BRUSSELS · DIPLOMACY', head: 'UK and EU seal a "reset" deal',
+    body: 'Youth visas for 100,000, food rules, carbon markets.', src: 'UK govt' },
+  { n: 5, key: 'POLAND', art: 'poland', tag: 'LUBLIN · SECURITY', head: 'Russian missile lands in a Polish field',
+    body: 'Kh-101, no one hurt; Tusk: "provocation".', src: 'Polish govt' },
+  { n: 6, key: 'HORMUZ', art: 'hormuz', tag: 'OFF OMAN · SHIPPING', head: 'Tanker hit and set ablaze in the strait',
+    body: 'Damaged off Khasab as it tried to pass.', src: 'UKMTO' },
+  { n: 7, key: 'YEMEN', art: 'yemen', tag: 'HODEIDAH · CONFLICT', head: 'Saudi-led coalition strikes Houthis',
+    body: 'Raids on 4 provinces; Houthis threaten ports.', src: 'AP, Al Jazeera' },
+  { n: 8, key: 'COP31', art: 'cop', tag: 'ANTALYA · CLIMATE', head: 'Climate summit runs into overtime',
+    body: 'Draft drops fossil fuels; ~200 nations split.', src: 'UN talks' },
+  { n: 9, key: 'STRIKE', art: 'strike', tag: 'ITALY · LABOUR', head: 'Italy general strike; Europe protests',
+    body: 'CGIL rallies in 100+ cities; 25 countries march.', src: 'Unions' },
+  { n: 10, key: 'IRAQ', art: 'iraq', tag: 'JURF AL-SAKHAR · SECURITY', head: 'Iraqi troops enter militia stronghold',
+    body: 'Kataib Hezbollah to leave within a month.', src: 'Iraqi govt' },
+  { n: 11, key: 'NIGERIA', art: 'boat', tag: 'BAYELSA · DISASTER', head: 'Boat of funeral mourners capsizes',
+    body: 'At least 4 dead, 24 rescued, police say.', src: 'Police, Reuters' },
+  { n: 12, key: 'NEW DELHI', art: 'delhi', tag: 'INDIA · PAKISTAN', head: 'Pakistani minister visits India',
+    body: 'First since the May 2025 war; SCO forum.', src: 'Al Jazeera' },
+  { n: 13, key: 'F1 · LAS VEGAS', art: 'f1', tag: 'LAS VEGAS · SPORT', head: 'Verstappen inherits pole position',
+    body: 'Antonelli fastest but takes 5-place penalty.', src: 'FIA' },
 ];
 const briefs = [
-  ['EUROPE', [
-    'Estonia shuts its Russia border; Moscow decries a "new iron curtain"',
-    'Belgrade mayor charged with assaulting an opposition politician',
-    'Young Germans protest against plans for military service',
-    'Qatar\'s emir deepens ties with Germany on Berlin visit',
-  ]],
-  ['AMERICAS', [
-    'Bukele seeks a third term after El Salvador scraps term limits',
-    'Salvadoran soldiers in Haiti killed while handling explosives',
-    'US Senate passes bill to speed up energy project approvals',
-    'NYC mayor Mamdani unveils plan to close Rikers Island by 2032',
-  ]],
-  ['AMERICAS · AFRICA', [
-    'Brazil recognises Indigenous land as Lula visits Chief Raoni',
-    'Thousands protest Colombia\'s tax plans',
-    'Senegal migrant boat capsizes; four bodies recovered',
-    'Malawi fuel shortage brings queues and chaos',
-  ]],
-  ['ASIA · TECH', [
-    'Myanmar and China object to ICJ Rohingya genocide ruling',
-    'Pakistan minister in New Delhi for SCO forum, first since 2025 war',
-    'Meta rethinks 2030 climate goal as AI data centres lift emissions',
-    'US lawmakers push tougher AI chip export rules',
-  ]],
+  [14, 'Gaza', 'Israeli drone strikes kill 7 in central Gaza', 'AJ'],
+  [15, 'Estonia', 'To shut Russia road border for 6 months', 'govt'],
+  [16, 'Germany', 'Youth rallies in ~40 cities against conscription', 'AJ'],
+  [17, 'Berlin', 'Qatar pledges €15bn more investment', 'Merz'],
+  [18, 'Serbia', 'Belgrade mayor charged with assault; denies it', 'AJ'],
+  [19, 'Myanmar', 'Calls Thursday\'s ICJ genocide ruling "unfair"', 'AJ'],
+  [20, 'New York', 'Mamdani plan: close Rikers Island by 2032', 'AJ'],
+  [21, 'New York', 'Indian man jailed 235 months over Sikh plot', 'court'],
+  [22, 'Wall St', 'Week: S&P 500 −8.6%, Nasdaq −10%', 'AP'],
+  [23, 'Haiti', 'El Salvador to help build 3 gang prisons', 'AP'],
+  [24, 'Yemen', 'Army claims 193 Houthis killed or hurt', 'Arab News'],
+  [25, 'Zaporizhzhia', 'Russian strike on a hospital kills 1', 'AJ'],
+  [26, 'Donetsk', 'Russian-installed officials say 3 killed', 'AJ'],
+  [27, 'Chips', 'AMD −11%, Sandisk −15% in the rout', 'AJ'],
+  [28, 'Las Vegas', 'Russell fastest in final F1 practice', 'FIA'],
 ];
 const numbers = [
-  ['−5.3%', 'Nasdaq'], ['−3.7%', 'S&P 500'], ['−14%', 'Nvidia'], ['−5.2%', 'Kospi'],
-  ['400+', 'drones at Ukraine'], ['100k', 'EU–UK youth visas'], ['8', 'killed in Kyiv, Lviv'],
+  ['8', 'killed in Kyiv and Lviv'], ['3', 'Kyiv bridges hit'], ['300,000+', 'evacuated for Akvan'],
+  ['−3.7%', 'S&P 500, in correction'], ['−14%', 'Nvidia'], ['−6.2%', 'Taiwan index'], ['100,000', 'UK–EU youth visas'],
 ];
-// story count per region (lead + tiles + briefs), checked against total below
-const regions = [['Global', 3], ['Europe', 8], ['Mid East', 4], ['Americas', 7], ['Africa', 3], ['Asia', 2]];
+const timeline = [
+  ['overnight', 'Missiles hit Kyiv'], ['02:00', 'Akvan landfall'], ['05:30', 'Taiwan closes −6.2%'],
+  ['06:30', 'Tokyo closes −5.1%'], ['16:30', 'Anthropic −9.5%'], ['21:00', 'S&P 500 closes −3.7%'],
+];
+// story numbers per region: 1-24
+const regionOf = { Europe: [1, 4, 5, 9, 15, 16, 17, 18, 25, 26], 'Mid East': [6, 7, 10, 14, 24], Asia: [2, 12, 19],
+  Americas: [3, 13, 20, 21, 22, 23, 27, 28], Africa: [11], Global: [8] };
+const regionColor = { Europe: '#1f4e9c', 'Mid East': '#b5651d', Asia: '#c8102e', Americas: '#2e8b57', Africa: '#7b3fa0', Global: '#555' };
+const total = leads.length + tiles.length + briefs.length;
+const counted = Object.values(regionOf).flat();
+if (counted.length !== total || new Set(counted).size !== total) throw new Error(`region map covers ${counted.length} of ${total}`);
 
-const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-const svg = (k, w = 300, h = 120) => `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" font-family="Segoe UI, Arial">${art[k]}</svg>`;
-const total = 1 + tiles.length + minis.length + briefs.reduce((n, [, l]) => n + l.length, 0);
-if (regions.reduce((n, [, c]) => n + c, 0) !== total) throw new Error('region tally does not add up to ' + total);
+// ---------- locator map: coarse coastlines, equirectangular ----------
+const MAP = { w: 300, h: 132, lon0: -130, lon1: 160, lat0: 72, lat1: -44 };
+const px = (lon, lat) => [((lon - MAP.lon0) / (MAP.lon1 - MAP.lon0)) * MAP.w, ((MAP.lat0 - lat) / (MAP.lat0 - MAP.lat1)) * MAP.h];
+const land = [
+  [[-168, 65], [-140, 70], [-95, 72], [-80, 63], [-60, 55], [-53, 47], [-66, 44], [-75, 35], [-81, 25], [-90, 30], [-97, 26], [-97, 18], [-87, 15], [-80, 8], [-84, 10], [-92, 15], [-105, 20], [-112, 30], [-118, 34], [-124, 40], [-124, 48], [-135, 58], [-150, 60], [-165, 55]],
+  [[-50, 60], [-40, 65], [-20, 70], [-25, 80], [-55, 82], [-70, 77], [-55, 68]],
+  [[-80, 8], [-72, 12], [-60, 10], [-50, 0], [-35, -6], [-39, -14], [-48, -26], [-58, -38], [-65, -55], [-72, -50], [-73, -38], [-70, -18], [-76, -12], [-81, -5], [-78, 2]],
+  [[-10, 36], [-9, 43], [-2, 44], [-5, 48], [2, 51], [8, 54], [10, 58], [5, 62], [15, 69], [28, 71], [40, 67], [45, 68], [60, 68], [80, 73], [105, 77], [140, 72], [170, 70], [180, 66], [160, 60], [142, 52], [140, 45], [130, 42], [122, 40], [121, 31], [117, 24], [108, 21], [106, 10], [100, 13], [98, 8], [100, 3], [104, 1], [98, 16], [92, 22], [88, 22], [80, 15], [77, 8], [72, 20], [66, 25], [57, 25], [56, 22], [59, 22], [52, 16], [44, 12], [42, 16], [35, 28], [33, 31], [35, 36], [28, 36], [26, 40], [23, 36], [20, 40], [15, 38], [18, 40], [12, 44], [9, 44], [3, 43], [-3, 37]],
+  [[-17, 15], [-17, 21], [-10, 30], [-6, 35], [10, 37], [11, 33], [20, 31], [32, 31], [35, 28], [43, 12], [51, 11], [40, -3], [40, -15], [35, -25], [20, -35], [17, -30], [12, -17], [13, -5], [9, 4], [-8, 4], [-15, 10]],
+  [[114, -22], [122, -18], [130, -12], [137, -12], [142, -11], [146, -19], [153, -26], [150, -37], [140, -38], [130, -32], [115, -34]],
+  [[-5, 50], [1, 51], [0, 54], [-2, 57], [-5, 58], [-5, 55], [-3, 54]],
+  [[130, 31], [135, 34], [140, 36], [142, 40], [141, 45], [140, 41], [136, 36], [131, 34]],
+];
+const pins = [[1, 30.5, 50.4], [2, 84.9, 19.3], [3, -74, 40.7], [4, 4.4, 50.8], [5, 22.6, 51.2], [6, 56.2, 26.2], [7, 42.9, 14.8],
+  [8, 30.7, 36.9], [9, 12.5, 41.9], [10, 44.2, 32.9], [11, 6.1, 4.8], [12, 77.2, 28.6], [13, -115.1, 36.2]];
+const regionByStory = Object.fromEntries(Object.entries(regionOf).flatMap(([r, ns]) => ns.map((n) => [n, r])));
+const mapSvg = `<svg viewBox="0 0 ${MAP.w} ${MAP.h}" font-family="Segoe UI, Arial">
+  <rect width="${MAP.w}" height="${MAP.h}" fill="#203a55"/>
+  ${land.map((poly) => `<polygon points="${poly.map(([lo, la]) => px(lo, la).map((v) => v.toFixed(1)).join(',')).join(' ')}" fill="#d9cfb4"/>`).join('')}
+  ${pins.map(([n, lo, la]) => { const [x, y] = px(lo, la); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6.2" fill="${regionColor[regionByStory[n]]}" stroke="#fff" stroke-width="1.2"/><text x="${x.toFixed(1)}" y="${(y + 3).toFixed(1)}" font-size="8" font-weight="800" fill="#fff" text-anchor="middle">${n}</text>`; }).join('')}
+</svg>`;
+
+const svg = (k) => `<svg viewBox="0 0 300 120" preserveAspectRatio="xMidYMid slice" font-family="Segoe UI, Arial">${art[k]}</svg>`;
+const card = (s, cls) => `<div class="card ${cls}"><div class="pic">${svg(s.art)}<div class="key"><i>${s.n}</i>${esc(s.key)}</div></div>
+  <div class="tag">${esc(s.tag)}</div><div class="head">${esc(s.head)}</div><div class="body">${esc(s.body)} <span class="src">${esc(s.src)}</span></div></div>`;
 
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{width:1024px;height:1024px;overflow:hidden;background:#faf7f0;font-family:"Segoe UI",Arial,sans-serif;color:#111}
-header{height:132px;background:#111;color:#fff;padding:10px 18px 0;position:relative}
-.kicker{font-size:15px;letter-spacing:3px;font-weight:700;color:#ffcc33}
-h1{font-family:Georgia,serif;font-size:64px;line-height:68px;font-weight:900;letter-spacing:-1px}
-.strap{font-size:15px;color:#ddd;margin-top:2px}
-.stamp{position:absolute;right:18px;top:14px;text-align:right;font-size:13px;color:#bbb;line-height:18px}
-.stamp b{display:block;font-size:30px;color:#fff;line-height:34px}
-.nums{display:flex;height:50px;background:#c8102e;color:#fff}
-.nums div{flex:1;text-align:center;border-right:1px solid #e86a7d;padding-top:3px}
-.nums b{display:block;font-size:22px;line-height:24px;font-weight:900}
-.nums span{font-size:11px;opacity:.95}
-main{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:226px;gap:8px;padding:8px 10px 0}
-.card{background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
-.card svg{width:100%;height:92px;display:block}
-.card.lead{grid-column:span 2}
-.card.lead svg{height:110px}
-.tag{font-size:10.5px;font-weight:800;letter-spacing:1px;color:#c8102e;padding:5px 8px 0}
-.head{font-size:17px;line-height:19px;font-weight:800;padding:2px 8px 0;font-family:Georgia,serif}
-.lead .head{font-size:22px;line-height:24px}
-.body{font-size:11.5px;line-height:14.5px;color:#333;padding:3px 8px 0}
-.minis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 10px 0}
-.mini{display:flex;background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;height:126px}
-.mini svg{width:96px;height:126px;flex:none;display:block}
-.mini div{padding:4px 7px 0}
-.mini .tag{padding:0}
-.mini .head{font-size:14.5px;line-height:16.5px;padding:1px 0 0}
-.mini .body{font-size:11px;line-height:13.5px;padding:2px 0 0}
-.briefs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 10px 0}
-.briefs h3{font-size:11px;letter-spacing:1px;color:#fff;background:#222;padding:2px 6px;border-radius:3px}
-.briefs li{font-size:12px;line-height:14px;list-style:none;padding:3px 0 0 10px;position:relative}
-.briefs li:before{content:"";position:absolute;left:1px;top:8px;width:5px;height:5px;background:#c8102e;border-radius:50%}
-footer{position:absolute;left:0;right:0;bottom:0;height:40px;background:#111;color:#ddd;font-size:11px;padding:4px 12px;display:flex;align-items:center;gap:12px}
-.bar{display:flex;height:14px;width:330px;border-radius:3px;overflow:hidden;flex:none}
-.bar i{display:block;height:100%;font-style:normal;font-size:9px;color:#fff;text-align:center;line-height:14px;font-weight:700}
+body{width:1024px;height:1024px;overflow:hidden;background:#f7f3ea;font-family:"Segoe UI",Arial,sans-serif;color:#151515;position:relative}
+.top{display:flex;justify-content:space-between;font-size:12px;font-weight:800;letter-spacing:1.5px;padding:7px 14px 0;color:#c8102e}
+.top span:last-child{color:#333}
+h1{font-family:Georgia,serif;font-size:66px;line-height:68px;font-weight:900;text-align:center;letter-spacing:-1px;border-top:3px solid #151515;margin:3px 14px 0}
+.strap{text-align:center;font-family:Georgia,serif;font-style:italic;font-size:15.5px;padding:1px 0 4px;border-bottom:1px solid #151515;margin:0 14px}
+.tl{display:flex;margin:5px 14px 0;height:26px;align-items:stretch;font-size:11px}
+.tl b.lab{background:#151515;color:#fff;font-size:10px;padding:0 6px;display:flex;align-items:center;letter-spacing:1px}
+.tl div{flex:1;border-right:1px solid #ccc;padding:1px 5px;line-height:12px}
+.tl div b{color:#c8102e;display:block;font-size:11.5px}
+.nums{display:flex;margin:5px 14px 0;gap:4px}
+.nums div{flex:1;border-left:4px solid #c8102e;background:#fff;padding:2px 6px 3px}
+.nums b{display:block;font-size:21px;line-height:23px;font-family:Georgia,serif}
+.nums span{font-size:10.5px;color:#444;line-height:12px;display:block}
+.bar{display:flex;margin:5px 14px 0;height:15px;font-size:9.5px;font-weight:800;color:#fff}
+.bar i{font-style:normal;text-align:center;line-height:15px}
+.grid{display:grid;gap:7px;margin:7px 14px 0}
+.g3{grid-template-columns:repeat(3,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{background:#fff;border:1px solid #d8d2c4;overflow:hidden}
+.pic{position:relative}.pic svg{display:block;width:100%}
+.lead .pic svg{height:112px}.small .pic svg{height:60px}
+.key{position:absolute;left:6px;top:6px;background:#c8102e;color:#fff;font-weight:900;letter-spacing:.5px;display:flex;align-items:center;gap:6px;padding:2px 8px 2px 3px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.key i{font-style:normal;background:#fff;color:#c8102e;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.lead .key{font-size:19px}.small .key{font-size:12.5px;top:4px;left:4px;padding:1px 6px 1px 2px}
+.small .key i{width:16px;height:16px;font-size:10px}
+.tag{font-size:10px;font-weight:800;color:#1f4e9c;letter-spacing:.6px;padding:4px 7px 0}
+.head{font-family:Georgia,serif;font-weight:900;padding:1px 7px 0}
+.lead .head{font-size:20px;line-height:22px}.small .head{font-size:14.5px;line-height:16px}
+.body{font-size:11.5px;line-height:14px;color:#333;padding:2px 7px 5px}.small .body{font-size:11px;line-height:13px}
+.src{color:#888;font-size:10px;white-space:nowrap}.src:before{content:"— "}
+.bottom{display:grid;grid-template-columns:300px 1fr;gap:10px;margin:7px 14px 0}
+.mapbox h3,.also h3{font-size:10.5px;letter-spacing:1px;font-weight:900;border-bottom:2px solid #151515;margin-bottom:3px}
+.mapbox svg{display:block;width:300px;height:132px}
+.also ol{columns:2;column-gap:12px;list-style:none}
+.also li{font-size:11.5px;line-height:14px;padding:2px 0;break-inside:avoid;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.also li i{font-style:normal;display:inline-block;min-width:17px;height:13px;color:#fff;font-size:9px;font-weight:800;text-align:center;margin-right:3px;border-radius:2px}
+.also li b{font-weight:800}.also li em{color:#888;font-style:normal;font-size:9.5px}
+.dc{margin-top:5px;border:2px solid #c8102e;padding:3px 6px;font-size:10.5px;line-height:12.5px;color:#333}
+.dc b{color:#c8102e}
+footer{position:absolute;left:14px;right:14px;bottom:4px;font-size:10px;color:#555;display:flex;justify-content:space-between;border-top:1px solid #999;padding-top:2px}
 </style></head><body>
-<header>
-  <div class="kicker">THE WORLD'S NEWS · ONE DAY ON ONE PAGE</div>
-  <h1>Friday 20 November 2026</h1>
-  <div class="strap">AI rout drags Wall Street into correction · EU and UK reset ties · Russia pounds Ukraine, missile lands in Poland · COP31 overruns</div>
-  <div class="stamp"><b>${total}</b>stories · 6 regions</div>
-</header>
+<div class="top"><span>THE WORLD'S NEWS IN ONE DAY</span><span>${total} STORIES · 6 REGIONS · ALL FROM FRIDAY 20 NOVEMBER 2026</span></div>
+<h1>Friday 20 November 2026</h1>
+<div class="strap">Russian missiles hit Kyiv's bridges · Cyclone Akvan strikes India · AI sell-off drags Wall Street into a correction · UK and EU seal a deal</div>
+<div class="tl"><b class="lab">THE DAY IN UTC</b>${timeline.map(([t, l]) => `<div><b>${t}</b>${esc(l)}</div>`).join('')}</div>
 <div class="nums">${numbers.map(([n, l]) => `<div><b>${n}</b><span>${esc(l)}</span></div>`).join('')}</div>
-<main>
-  <div class="card lead">${svg(lead.art, 540, 110)}<div class="tag">${lead.tag}</div><div class="head">${esc(lead.head)}</div><div class="body">${esc(lead.body)}</div></div>
-  ${tiles.map((t) => `<div class="card">${svg(t.art)}<div class="tag">${t.tag}</div><div class="head">${esc(t.head)}</div><div class="body">${esc(t.body)}</div></div>`).join('\n  ')}
-</main>
-<section class="minis">${minis.map((m) => `<div class="mini">${svg(m.art, 120, 100)}<div><div class="tag">${m.tag}</div><div class="head">${esc(m.head)}</div><div class="body">${esc(m.body)}</div></div></div>`).join('')}</section>
-<section class="briefs">${briefs.map(([h, l]) => `<div><h3>${h}</h3><ul>${l.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</section>
-<footer>
-  <div class="bar">${regions.map(([r, n], i) => `<i style="width:${(n / total) * 100}%;background:${['#555', '#003399', '#b5651d', '#2e8b57', '#c8102e', '#7b3fa0'][i]}">${r} ${n}</i>`).join('')}</div>
-  <div>Date check: every item happened or was first reported on Fri 20 Nov 2026. Figures and claims as reported by AP, Reuters, Al Jazeera and officials; casualty tolls are early counts.</div>
-</footer>
+<div class="bar">${Object.entries(regionOf).map(([r, ns]) => `<i style="width:${(ns.length / total) * 100}%;background:${regionColor[r]}">${r} ${ns.length}</i>`).join('')}</div>
+<div class="grid g3">${leads.map((s) => card(s, 'lead')).join('')}</div>
+<div class="grid g5">${tiles.slice(0, 5).map((s) => card(s, 'small')).join('')}</div>
+<div class="grid g5">${tiles.slice(5).map((s) => card(s, 'small')).join('')}</div>
+<div class="bottom">
+  <div class="mapbox"><h3>WHERE IT HAPPENED · stories 1–13</h3>${mapSvg}</div>
+  <div class="also"><h3>ALSO ON FRIDAY 20 NOVEMBER — ${briefs.length} MORE</h3>
+    <ol>${briefs.map(([n, p, t, s]) => `<li><i style="background:${regionColor[regionByStory[n]]}">${n}</i><b>${esc(p)}</b> ${esc(t)} <em>(${esc(s)})</em></li>`).join('')}</ol>
+    <div class="dc"><b>DATE CHECK</b> Left out as Thursday 19 Nov news: the ICJ's Rohingya ruling, Anthropic's IPO day, the Trump–Putin–Xi statement, the US Senate energy-permits vote and Ukraine's Kerch Bridge strikes (16–19 Nov). Not yet: COP31's final text, Saturday's Las Vegas race.</div>
+  </div>
+</div>
+<footer><span>Every story here happened, or was first reported, on Friday 20 November 2026. Tolls are early official counts; claims are attributed.</span><span>Original drawings</span></footer>
 </body></html>`;
 
 mkdirSync(join(root, 'build'), { recursive: true });
