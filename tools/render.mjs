@@ -157,6 +157,9 @@ const briefs = [
   [30, 'New York', 'Mayor Mamdani plans to close Rikers by 2032'],
   [31, 'US', 'Hunger Games prequel opens with $21M in previews'],
   [32, 'Football', 'Nations League draw: Spain v France'],
+  [33, 'Berlin', 'Qatar pledges €15bn more investment in Germany'],
+  [34, 'Florida', 'Floods: 17+ inches of rain on east coast since Tuesday'],
+  [35, 'Tennis', 'ATP: players to share $350m+ from 2028'],
 ];
 const numbers = [
   ['8', 'killed in Kyiv and Lviv'], ['3', 'Kyiv bridges hit'], ['300,000+', 'evacuated for Akvan'],
@@ -166,8 +169,8 @@ const timeline = [
   ['overnight', 'Missiles hit Kyiv'], ['02:00', 'Akvan landfall'], ['05:30', 'Taiwan closes −6.2%'],
   ['06:30', 'Tokyo closes −5.1%'], ['07:00', 'UK retail +0.7%'], ['11:00', 'Nations League draw'], ['21:00', 'S&P 500 closes −3.7%'],
 ];
-const regionOf = { Europe: [1, 4, 5, 9, 19, 20, 21, 22, 32], 'Mid East': [6, 7, 10, 14, 15],
-  'Asia-Pac': [2, 13, 23, 24, 25, 26, 27], Africa: [11, 16, 17, 18], Americas: [3, 28, 29, 30, 31], Global: [8, 12] };
+const regionOf = { Europe: [1, 4, 5, 9, 19, 20, 21, 22, 32, 33], 'Mid East': [6, 7, 10, 14, 15],
+  'Asia-Pac': [2, 13, 23, 24, 25, 26, 27], Africa: [11, 16, 17, 18], Americas: [3, 28, 29, 30, 31, 34], Global: [8, 12, 35] };
 const regionColor = { Europe: '#1f4e9c', 'Mid East': '#b5651d', 'Asia-Pac': '#c8102e', Americas: '#2e8b57', Africa: '#7b3fa0', Global: '#555' };
 const total = leads.length + tiles.length + briefs.length;
 const counted = Object.values(regionOf).flat();
@@ -229,7 +232,7 @@ h1{font-family:Georgia,serif;font-size:66px;line-height:68px;font-weight:900;tex
 .small .key i{width:16px;height:16px;font-size:10px}
 .tag{font-size:10px;font-weight:800;color:#1f4e9c;letter-spacing:.6px;padding:4px 7px 0;white-space:nowrap;overflow:hidden}
 .head{font-family:Georgia,serif;font-weight:900;padding:1px 7px 0}
-.lead .head{font-size:25px;line-height:27px}.small .head{font-size:17px;line-height:18.5px}
+.lead .head{font-size:27px;line-height:28px;letter-spacing:-.3px}.small .head{font-size:17px;line-height:18.5px}
 .body{font-size:12px;line-height:14.5px;color:#333;padding:2px 7px 5px}.small .body{font-size:11.5px;line-height:13px;white-space:nowrap;overflow:hidden}
 .src{color:#888;font-size:10px;white-space:nowrap}.src:before{content:"— "}
 .bottom{display:grid;grid-template-columns:300px minmax(0,1fr);gap:10px;margin:7px 14px 0}
