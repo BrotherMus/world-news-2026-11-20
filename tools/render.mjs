@@ -103,39 +103,39 @@ const art = {
 // ---------- stories ----------
 const leads = [
   { n: 1, key: 'KYIV', art: 'kyiv', tag: 'KYIV, UKRAINE · WAR',
-    head: 'Russian missiles hit three Kyiv bridges; 8 killed',
-    body: 'Ballistic missiles damaged the Podilskyi, Darnytskyi and Southern bridges, the mayor says. 6 dead in Kyiv, 2 in Lviv, 28 hurt; Kyiv says 400+ drones, 110+ missiles. Power cut in Kyiv and 10 regions.',
+    head: 'Russian missiles hit three Kyiv bridges',
+    body: 'Ballistic missiles damaged three Dnipro bridges, the mayor says. 8 killed in Kyiv and Lviv, 28 hurt; power cut in Kyiv and 10 regions.',
     src: 'Ukraine govt, Al Jazeera' },
   { n: 2, key: 'CYCLONE AKVAN', art: 'cyclone', tag: 'ODISHA, INDIA · WEATHER',
-    head: 'Cyclone Akvan comes ashore near Gopalpur',
-    body: 'Landfall began about 02:00 UTC with 70–80 km/h winds, gusts to 90. Over 300,000 people moved to shelters; no deaths reported. Dozens of trains cancelled.',
+    head: 'Cyclone Akvan comes ashore in India',
+    body: 'Landfall near Gopalpur from about 02:00 UTC, winds 70–80 km/h. Over 300,000 moved to shelters; no deaths reported.',
     src: 'IMD, Odisha govt' },
   { n: 3, key: 'AI SELL-OFF', art: 'rout', tag: 'NEW YORK · TAIPEI · SEOUL · MARKETS',
-    head: 'AI rout pushes S&P 500 into a correction',
-    body: 'Nasdaq −5.3%, worst week since March 2020; Dow −950 points. Nvidia −14% after a report SEC staff are examining its accounting. Asia fell first: Taiwan −6.2%, Seoul −5.2%, Tokyo −5.1%.',
+    head: 'AI rout drives S&P 500 into correction',
+    body: 'Nasdaq −5.3%, worst week since March 2020. Nvidia −14% on an SEC accounting report. Taiwan −6.2%, Seoul −5.2%, Tokyo −5.1%.',
     src: 'AP, Reuters, CNBC' },
 ];
 const tiles = [
-  { n: 4, key: 'UK–EU DEAL', art: 'euuk', tag: 'BRUSSELS', head: 'UK and EU seal a "reset" deal',
-    body: 'Youth visas for 100,000, food rules, carbon markets.', src: 'UK govt' },
-  { n: 5, key: 'POLAND', art: 'poland', tag: 'LUBLIN · SECURITY', head: 'Russian missile lands in a Polish field',
-    body: 'Kh-101, no one hurt; Tusk: "provocation".', src: 'Polish govt' },
-  { n: 6, key: 'HORMUZ', art: 'hormuz', tag: 'OFF OMAN', head: 'Tanker hit and set ablaze in the strait',
-    body: 'Damaged off Khasab as it tried to pass.', src: 'UKMTO' },
-  { n: 7, key: 'YEMEN', art: 'yemen', tag: 'HODEIDAH, YEMEN', head: 'Saudi-led coalition strikes Houthis',
-    body: 'Raids on 4 provinces; Houthis threaten ports.', src: 'AP, Al Jazeera' },
+  { n: 4, key: 'UK–EU DEAL', art: 'euuk', tag: 'BRUSSELS · DIPLOMACY', head: 'UK and EU seal a "reset" deal',
+    body: 'Youth visas, food rules, carbon.', src: 'UK govt' },
+  { n: 5, key: 'POLAND', art: 'poland', tag: 'LUBLIN · SECURITY', head: 'Russian missile lands in Poland',
+    body: 'A Kh-101 in a field; no one hurt.', src: 'Polish govt' },
+  { n: 6, key: 'HORMUZ', art: 'hormuz', tag: 'OFF OMAN · SHIPPING', head: 'Tanker set ablaze in Hormuz',
+    body: 'Hit off Khasab, Oman.', src: 'UKMTO' },
+  { n: 7, key: 'YEMEN', art: 'yemen', tag: 'YEMEN · CONFLICT', head: 'Saudi coalition strikes Houthis',
+    body: 'Hodeidah, Sanaa, Saada, Taiz.', src: 'AP' },
   { n: 8, key: 'COP31', art: 'cop', tag: 'ANTALYA · CLIMATE', head: 'Climate summit runs into overtime',
-    body: 'Draft drops fossil fuels; ~200 nations split.', src: 'UN talks' },
-  { n: 9, key: 'STRIKE', art: 'strike', tag: 'ITALY · LABOUR', head: 'Italy general strike; Europe protests',
-    body: 'CGIL rallies in 100+ cities; 25 countries march.', src: 'Unions' },
-  { n: 10, key: 'IRAQ', art: 'iraq', tag: 'JURF AL-SAKHAR', head: 'Iraqi troops enter militia stronghold',
-    body: 'Kataib Hezbollah to leave within a month.', src: 'Iraqi govt' },
-  { n: 11, key: 'KENYA OIL', art: 'kenya', tag: 'TURKANA, KENYA', head: 'Kenya starts drilling its first oil well',
-    body: 'Phase one aims for 20,000+ barrels a day.', src: 'Energy ministry' },
-  { n: 12, key: 'CANCER PILL', art: 'pill', tag: 'BARCELONA', head: 'Pill shrinks pancreatic tumours',
-    body: '60.7% of 61 patients respond in early trial.', src: 'EORTC' },
-  { n: 13, key: 'CRICKET', art: 'cricket', tag: 'WELLINGTON', head: 'Nicholls 175* as NZ make 368',
-    body: 'India reply 159-1 at stumps on day two.', src: 'NZ Herald' },
+    body: 'Draft drops fossil fuels.', src: 'UN talks' },
+  { n: 9, key: 'STRIKE', art: 'strike', tag: 'ITALY · LABOUR', head: 'Italy holds a general strike',
+    body: 'Protests in 25 countries.', src: 'Unions' },
+  { n: 10, key: 'IRAQ', art: 'iraq', tag: 'IRAQ · SECURITY', head: 'Iraqi troops enter militia base',
+    body: 'Kataib Hezbollah to leave.', src: 'Iraqi govt' },
+  { n: 11, key: 'KENYA OIL', art: 'kenya', tag: 'TURKANA · ENERGY', head: 'Kenya drills its first oil well',
+    body: 'Aim: 20,000+ barrels a day.', src: 'Ministry' },
+  { n: 12, key: 'CANCER PILL', art: 'pill', tag: 'BARCELONA · HEALTH', head: 'Pill shrinks pancreatic tumours',
+    body: '60.7% of 61 patients respond.', src: 'EORTC' },
+  { n: 13, key: 'CRICKET', art: 'cricket', tag: 'WELLINGTON · SPORT', head: 'Nicholls 175* as NZ make 368',
+    body: 'India 159-1 at stumps, day 2.', src: 'NZ Herald' },
 ];
 const briefs = [
   [14, 'Gaza', 'Israeli drone strikes kill at least 7 in central Gaza'],
@@ -197,17 +197,9 @@ const mapSvg = `<svg viewBox="0 0 ${MAP.w} ${MAP.h}" font-family="Segoe UI, Aria
 </svg>`;
 
 const svg = (k) => `<svg viewBox="0 0 300 120" preserveAspectRatio="xMidYMid slice" font-family="Segoe UI, Arial">${art[k]}</svg>`;
-// v5: the one fact each picture should carry, and how firm the story is
-const extra = {
-  1: ['3 bridges hit · 8 dead', 'OFFICIAL'], 2: ['Landfall 02:00 UTC · 300,000+ moved', 'OFFICIAL'],
-  3: ['Worst week since 2020', 'CONFIRMED'], 4: ['100,000 youth visas', 'CONFIRMED'],
-  5: ['Kh-101 in a field', 'OFFICIAL'], 6: ['Tanker ablaze', 'REPORTED'], 7: ['4 provinces hit', 'REPORTED'],
-  8: ['No deal yet', 'ONGOING'], 9: ['100+ cities', 'CONFIRMED'], 10: ['Troops move in', 'OFFICIAL'],
-  11: ['20,000 barrels/day goal', 'OFFICIAL'], 12: ['60.7% respond', 'EARLY DATA'], 13: ['NZ 368 v India', 'SCORECARD'],
-};
 const card = (s, cls) => `<div class="card ${cls}"><div class="pic">${svg(s.art)}<div class="key"><i>${s.n}</i>${esc(s.key)}</div>
-  <div class="sub">${esc(extra[s.n][0])}</div></div>
-  <div class="tag"><span class="conf">${extra[s.n][1]}</span>${esc(s.tag)}</div><div class="head">${esc(s.head)}</div><div class="body">${esc(s.body)} <span class="src">${esc(s.src)}</span></div></div>`;
+</div>
+  <div class="tag">${esc(s.tag)}</div><div class="head">${esc(s.head)}</div><div class="body">${esc(s.body)}${cls === 'lead' ? ` <span class="src">${esc(s.src)}</span>` : ''}</div></div>`;
 
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -222,7 +214,7 @@ h1{font-family:Georgia,serif;font-size:66px;line-height:68px;font-weight:900;tex
 .tl div b{color:#c8102e;display:block;font-size:11.5px}
 .nums{display:flex;margin:5px 14px 0;gap:4px}
 .nums div{flex:1;border-left:4px solid #c8102e;background:#fff;padding:2px 6px 3px}
-.nums b{display:block;font-size:21px;line-height:23px;font-family:Georgia,serif}
+.nums b{display:block;font-size:25px;line-height:26px;font-family:Georgia,serif;color:#c8102e}
 .nums span{font-size:10.5px;color:#444;line-height:12px;display:block}
 .bar{display:flex;margin:5px 14px 0;height:15px;font-size:9.5px;font-weight:800;color:#fff}
 .bar i{font-style:normal;text-align:center;line-height:15px}
@@ -235,14 +227,10 @@ h1{font-family:Georgia,serif;font-size:66px;line-height:68px;font-weight:900;tex
 .key i{font-style:normal;background:#fff;color:#c8102e;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px}
 .lead .key{font-size:19px}.small .key{font-size:12.5px;top:4px;left:4px;padding:1px 6px 1px 2px}
 .small .key i{width:16px;height:16px;font-size:10px}
-.sub{position:absolute;left:6px;top:38px;background:#fff;color:#151515;font-weight:800;font-size:13px;padding:1px 6px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.small .sub{left:4px;top:25px;font-size:10.5px;padding:0 4px}
-.conf{float:right;color:#2e7d32;border:1.2px solid #2e7d32;font-size:8px;font-weight:900;letter-spacing:.4px;padding:0 3px;border-radius:2px;line-height:11px;margin-left:4px}
-.lead .conf{font-size:9px}
 .tag{font-size:10px;font-weight:800;color:#1f4e9c;letter-spacing:.6px;padding:4px 7px 0;white-space:nowrap;overflow:hidden}
 .head{font-family:Georgia,serif;font-weight:900;padding:1px 7px 0}
-.lead .head{font-size:20px;line-height:22px}.small .head{font-size:14.5px;line-height:16px}
-.body{font-size:11.5px;line-height:14px;color:#333;padding:2px 7px 5px}.small .body{font-size:11px;line-height:13px}
+.lead .head{font-size:25px;line-height:27px}.small .head{font-size:17px;line-height:18.5px}
+.body{font-size:12px;line-height:14.5px;color:#333;padding:2px 7px 5px}.small .body{font-size:11.5px;line-height:13px;white-space:nowrap;overflow:hidden}
 .src{color:#888;font-size:10px;white-space:nowrap}.src:before{content:"— "}
 .bottom{display:grid;grid-template-columns:300px minmax(0,1fr);gap:10px;margin:7px 14px 0}
 .also{min-width:0}
@@ -272,7 +260,7 @@ footer{position:absolute;left:14px;right:14px;bottom:4px;font-size:10px;color:#5
     <div class="dc"><b>DATE CHECK</b> Left out as earlier news: the ICJ's Rohingya ruling, Anthropic's IPO day, the Trump–Putin–Xi statement, the US Senate energy vote, Uganda's Ebola rally ban (all 19 Nov) and the Kerch Bridge strikes (16–19 Nov). Not yet: COP31's final text, the Las Vegas race.</div>
   </div>
 </div>
-<footer><span>All from Fri 20 Nov 2026 · OFFICIAL = on the record · CONFIRMED = 2+ outlets · REPORTED = one source</span><span>Sources: AP, Reuters, AFP, Al Jazeera, IMD, ONS · original drawings</span></footer>
+<footer><span>Every story happened, or was first reported, on Fri 20 Nov 2026. Tolls are early official counts; claims attributed.</span><span>Sources: AP, Reuters, AFP, Al Jazeera, IMD, ONS · original drawings</span></footer>
 </body></html>`;
 
 mkdirSync(join(root, 'build'), { recursive: true });
